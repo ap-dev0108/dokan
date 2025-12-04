@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "IM6nA4rzcQU=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\aryan\\RiderProjects\\dokan\\dokan\\dokan.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\aryan\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.8\\microsoft.aspnetcore.openapi.9.0.8.nupkg.sha512",
+    "C:\\Users\\aryan\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}
