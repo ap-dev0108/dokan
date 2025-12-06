@@ -20,13 +20,15 @@ public class AuthController : ControllerBase
     private readonly SignInManager<User> _signInManager;
     private readonly UserManager<User> _userManager;
     private readonly RoleManager<IdentityRole> _role;
+    private readonly IConfiguration _configuration;
     
-    public AuthController(ApplicationDB db, SignInManager<User> signInManager, UserManager<User> userManager,  RoleManager<IdentityRole> role)
+    public AuthController(ApplicationDB db, SignInManager<User> signInManager, UserManager<User> userManager,  RoleManager<IdentityRole> role, IConfiguration configuration)
     {
         _db = db;
         _signInManager = signInManager;
         _userManager = userManager;
         _role = role;
+        _configuration = configuration;
     }
     
     [HttpPost("/register")]
@@ -50,7 +52,7 @@ public class AuthController : ControllerBase
         
         await _userManager.AddToRoleAsync(newUser, "User");
 
-        var token = GenerateJwtToken(newUser.Email);
+        var token = await GenerateJwtToken(newUser);
         return Ok(new { token });
     }
 
@@ -64,7 +66,8 @@ public class AuthController : ControllerBase
         var checkCredentials = await _signInManager.CheckPasswordSignInAsync(checkEmail, loginDto.password, false);
         if (!checkCredentials.Succeeded) return BadRequest(new { error = "Username or password is incorrect" });
         
-        var token = GenerateJwtToken(checkEmail.Email);
+        var token = await GenerateJwtToken(checkEmail);
+        
         return Ok(new { token });
     }
 
@@ -72,29 +75,40 @@ public class AuthController : ControllerBase
     [HttpGet("profile")]
     public IActionResult GetProfile()
     {
-        string user = User.Identity.Name;
+        string? user = User.Identity?.Name;
         
         return Ok(new
         {
             user,
-            authenticated = User.Identity.IsAuthenticated
+            authenticated = User.Identity?.IsAuthenticated ?? false
         });
     }
 
-    private string GenerateJwtToken(string email)
+    private async Task<string> GenerateJwtToken(User user)
     {
-        var claims = new[]
+        var roles = await _userManager.GetRolesAsync(user);
+        var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, email),
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim(ClaimTypes.Name, user.UserName ?? user.Email ?? ""),
+            new Claim(ClaimTypes.Email, user.Email ?? ""),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
+        
+        // Adding roles to the token
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("d74c3b2e07e5ec0f12f96abce0cbe2e53a51a4deb1838fd9fe9bfa38498dfddb"));
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        var jwtSettings = _configuration.GetSection("Jwt");
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not found in configuration")));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            issuer: "localhost:7258/swagger/index.html",
-            audience: "https://api.yourdomain.com",
+            issuer: jwtSettings["Issuer"],
+            audience: jwtSettings["Audience"],
             claims: claims,
             expires: DateTime.Now.AddMinutes(30),
             signingCredentials: creds);

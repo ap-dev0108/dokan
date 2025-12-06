@@ -1,5 +1,8 @@
+using System.Runtime.InteropServices.ComTypes;
 using Microsoft.AspNetCore.Identity;
 using dokan.Models.Entities;
+using Microsoft.AspNetCore.Http.HttpResults;
+
 public static class SeedAdmin
 {
     public static async Task InitializeAsync(IServiceProvider serviceProvider)
@@ -19,7 +22,7 @@ public static class SeedAdmin
         }
 
         // ---------- SEED ADMIN USER ----------
-        string adminEmail = "admin@dokan.com";
+        string adminEmail = "admin@gmail.com";
         string adminPassword = "Admin@123"; // Change after login
 
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
@@ -35,10 +38,12 @@ public static class SeedAdmin
 
             var result = await userManager.CreateAsync(adminUser, adminPassword);
 
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
-                await userManager.AddToRoleAsync(adminUser, "Admin");
+                throw new Exception();
             }
+
+            await userManager.AddToRoleAsync(adminUser, "Admin");
         }
     }
 }

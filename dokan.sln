@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dokan", "dokan.csproj", "{0DA4F00F-3B57-E106-C042-D6BF1F5DD548}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0DA4F00F-3B57-E106-C042-D6BF1F5DD548}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DA4F00F-3B57-E106-C042-D6BF1F5DD548}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DA4F00F-3B57-E106-C042-D6BF1F5DD548}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DA4F00F-3B57-E106-C042-D6BF1F5DD548}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {18CBDEAC-F724-42D2-A08B-0DCB58F5A91F}
+	EndGlobalSection
+EndGlobal
