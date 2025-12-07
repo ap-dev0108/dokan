@@ -110,7 +110,7 @@ public class AuthController : ControllerBase
             issuer: jwtSettings["Issuer"],
             audience: jwtSettings["Audience"],
             claims: claims,
-            expires: DateTime.Now.AddMinutes(30),
+            expires: DateTime.Now.AddHours(2),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

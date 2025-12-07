@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace dokan.Controller;
 
-[ApiController]
 [Route("api/[controller]")]
+[ApiController]
 public class ProductController : ControllerBase
 {
     private readonly ApplicationDB _db;
@@ -21,27 +21,23 @@ public class ProductController : ControllerBase
         _userManager = userManager;
     }
     
-    
-    [Authorize]
     [HttpGet("allProducts")]
     public async Task<IActionResult> GetAllProducts()
     {
         try
         {
-            var user = await _userManager.GetUserAsync(User);
+            if (!User.Identity?.IsAuthenticated ?? true)
+            {
+                return Unauthorized(new { error = "Token not recognized", claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList() });
+            }
 
-            if (user == null)
-                return Unauthorized(new { error = "Invalid or missing token" });
-
-            var roles = await _userManager.GetRolesAsync(user);
-
-            if (!roles.Contains("Admin"))
-                return Forbid("Admin access required");
+            if (!User.IsInRole("Admin"))
+                return Forbid();
 
             var allProducts = await _db.Products.ToListAsync();
 
             if (!allProducts.Any())
-                return NotFound("No products found");
+                return NotFound(new { error = "Product not found" });
 
             return Ok(new { productData = allProducts });
         }

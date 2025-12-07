@@ -6,6 +6,9 @@ using System.Text;
 using dokan.Models.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,18 +17,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen(option =>
 {
-    option.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo()
+    option.SwaggerDoc("v1", new OpenApiInfo()
     {
         Title = "Web Api",
         Version = "v1"
     });
     
-    option.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme()
+    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
     {
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        In = ParameterLocation.Header,
         Description = "Enter token",
         Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Type = SecuritySchemeType.Http,
         BearerFormat = "JWT",
         Scheme = "bearer",
     });
@@ -44,16 +47,25 @@ builder.Services.AddSwaggerGen(option =>
         }
     });
 });
+
+builder.Services.AddAuthorization(options =>
+{
+    // Configure default policy to return 401 instead of redirecting to login
+    options.FallbackPolicy = null;
+    
+    // Configure default authorization policy for API endpoints
+    options.DefaultPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+
 builder.Services.AddControllers();
+builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<ApplicationDB>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-
-// Token injection
-var jwtSettings = builder.Configuration.GetSection("Jwt");
-var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]);
 
 builder.Services.AddAuthentication(options =>
 {
@@ -66,21 +78,17 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not found in configuration"))),
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero,
-        NameClaimType = System.Security.Claims.ClaimTypes.NameIdentifier,
-        RoleClaimType = System.Security.Claims.ClaimTypes.Role
+        NameClaimType = ClaimTypes.NameIdentifier,
+        RoleClaimType = ClaimTypes.Role,
     };
 });
-
-builder.Services.AddAuthorization();
-
-
 
 // Add Identity
 builder.Services.AddIdentity<User, IdentityRole>(options =>
@@ -90,6 +98,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     options.Password.RequireUppercase = false;
     options.Password.RequireNonAlphanumeric = false;
 }).AddEntityFrameworkStores<ApplicationDB>().AddDefaultTokenProviders();
+
 
 var app = builder.Build();
 
@@ -106,8 +115,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseRouting();
 app.UseHttpsRedirection();
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
