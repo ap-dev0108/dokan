@@ -1,13 +1,13 @@
 using dokan.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using dokan.DTO;
+using dokan.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
-using dokan.DTO;
-using dokan.Models.Entities;
-using Microsoft.AspNetCore.Authorization;
 
 namespace dokan.Controller;
 
@@ -67,7 +67,6 @@ public class AuthController : ControllerBase
         if (!checkCredentials.Succeeded) return BadRequest(new { error = "Username or password is incorrect" });
         
         var token = await GenerateJwtToken(checkEmail);
-        
         return Ok(new { token });
     }
 
@@ -86,6 +85,10 @@ public class AuthController : ControllerBase
 
     private async Task<string> GenerateJwtToken(User user)
     {
+        var jwtSettings = _configuration.GetSection("Jwt");
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not found in configuration")));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
         var roles = await _userManager.GetRolesAsync(user);
         var claims = new List<Claim>
         {
@@ -94,23 +97,17 @@ public class AuthController : ControllerBase
             new Claim(ClaimTypes.Email, user.Email ?? ""),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
-        
-        // Adding roles to the token
 
         foreach (var role in roles)
         {
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
 
-        var jwtSettings = _configuration.GetSection("Jwt");
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not found in configuration")));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
         var token = new JwtSecurityToken(
             issuer: jwtSettings["Issuer"],
             audience: jwtSettings["Audience"],
             claims: claims,
-            expires: DateTime.Now.AddHours(2),
+            expires: DateTime.UtcNow.AddHours(2),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

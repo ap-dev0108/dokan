@@ -1,14 +1,12 @@
 using dokan.Database;
 using Microsoft.EntityFrameworkCore;   
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using dokan.Models.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using System.Security.Claims;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.AspNetCore.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,20 +41,10 @@ builder.Services.AddSwaggerGen(option =>
                     Type = ReferenceType.SecurityScheme,
                     Id =  "Bearer"
                 }
-            },[]
+            },
+            Array.Empty<string>()
         }
     });
-});
-
-builder.Services.AddAuthorization(options =>
-{
-    // Configure default policy to return 401 instead of redirecting to login
-    options.FallbackPolicy = null;
-    
-    // Configure default authorization policy for API endpoints
-    options.DefaultPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
 });
 
 builder.Services.AddControllers();
@@ -67,30 +55,37 @@ builder.Services.AddDbContext<ApplicationDB>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+
+// JWT Authentication Configuration - MUST be before Identity
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var jwtKey = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not found in configuration");
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
+})
+.AddJwtBearer(options =>
 {
     options.RequireHttpsMetadata = false;
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not found in configuration"))),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
         ValidateIssuer = true,
         ValidateAudience = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero,
         NameClaimType = ClaimTypes.NameIdentifier,
-        RoleClaimType = ClaimTypes.Role,
+        RoleClaimType = ClaimTypes.Role
     };
+    
 });
 
-// Add Identity
+// Add Identity - after JWT configuration
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
@@ -98,6 +93,9 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     options.Password.RequireUppercase = false;
     options.Password.RequireNonAlphanumeric = false;
 }).AddEntityFrameworkStores<ApplicationDB>().AddDefaultTokenProviders();
+
+
+builder.Services.AddAuthorization();
 
 
 var app = builder.Build();

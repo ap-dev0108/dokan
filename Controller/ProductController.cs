@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace dokan.Controller;
 
@@ -21,16 +22,12 @@ public class ProductController : ControllerBase
         _userManager = userManager;
     }
     
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet("allProducts")]
     public async Task<IActionResult> GetAllProducts()
     {
         try
         {
-            if (!User.Identity?.IsAuthenticated ?? true)
-            {
-                return Unauthorized(new { error = "Token not recognized", claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList() });
-            }
-
             if (!User.IsInRole("Admin"))
                 return Forbid();
 
@@ -47,4 +44,27 @@ public class ProductController : ControllerBase
         }
     }
 
+
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpPost("addProduct")]
+    public async Task<IActionResult> AddProduct([FromBody] Products products) {
+        try {
+            var checkExistingProduct = await _db.Products.FirstOrDefaultAsync(p => p.productId == products.productId);
+            if (checkExistingProduct != null) return Conflict(new { error = "Product already exists" });
+
+            var newProduct = new Products {
+                productId = products.productId,
+                productTitle = products.productTitle,
+                productDescription = products.productDescription,
+                price = products.price
+            };
+
+            await _db.Products.AddAsync(newProduct);
+            await _db.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetAllProducts), new { id = newProduct.productId }, newProduct);
+            
+        } catch (Exception ex) {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
 }
