@@ -8,4 +8,5 @@ public class Products
     [Required] public string productTitle { get; set; }
     [Required] public string productDescription { get; set; }
     [Required] public float price { get; set; }
+    public string? imageUrl { get; set; }
 }

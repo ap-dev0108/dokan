@@ -131,3 +131,4 @@ C:\Users\aryan\RiderProjects\dokan\dokan\obj\Debug\net9.0\refint\dokan.dll
 C:\Users\aryan\RiderProjects\dokan\dokan\obj\Debug\net9.0\dokan.pdb
 C:\Users\aryan\RiderProjects\dokan\dokan\obj\Debug\net9.0\dokan.genruntimeconfig.cache
 C:\Users\aryan\RiderProjects\dokan\dokan\obj\Debug\net9.0\ref\dokan.dll
+C:\Users\aryan\RiderProjects\dokan\dokan\bin\Debug\net9.0\dokan.staticwebassets.runtime.json

@@ -27,6 +27,7 @@
 
     <ItemGroup>
       <Folder Include="Models\Enum\" />
+      <Folder Include="wwwroot\images\products\" />
     </ItemGroup>
 
 </Project>

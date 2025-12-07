@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("dokan")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+14b90e0ccb93337e16fa9f7870f6815130c3a930")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+37594f750c81dcbca130b3cafc501b5cb24467ff")]
 [assembly: System.Reflection.AssemblyProductAttribute("dokan")]
 [assembly: System.Reflection.AssemblyTitleAttribute("dokan")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
