@@ -102,7 +102,7 @@ export default function Home() {
             </div>
             <div className="flex-1 text-center">
               <p className="font-quicksand text-sm uppercase tracking-widest mb-6 text-gray-300">Sale Ends In</p>
-              <CountdownTimer />
+              
             </div>
           </div>
         </div>
@@ -119,7 +119,7 @@ export default function Home() {
           </p>
           <div className="bg-dokan-dark text-dokan-light rounded-lg p-8 md:p-12 text-center">
             <p className="font-quicksand text-sm uppercase tracking-widest mb-4 text-gray-300">Offers Expire In</p>
-            <CountdownTimer />
+            
             <Link
               href="/sale"
               className="inline-block mt-8 px-8 py-4 bg-dokan-light text-dokan-dark rounded-full font-manrope font-bold hover:bg-gray-200 transition-colors"
