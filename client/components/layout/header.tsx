@@ -58,14 +58,14 @@ export default function Header() {
                 </div>
 
                 <div className="hidden md:flex items-center gap-4">
-                    <Link href="/login"
+                    <Link href="/auth/login"
                         className="px-6 py-3 border-2 border-dokan-dark text-dokan-dark rounded-full font-quicksand
                         font-medium hover:bg-dokan-dark hover:text-dokan-light transition-all text-sm"
                     >
                         Login
                     </Link>
 
-                    <Link href="/register"
+                    <Link href="/auth/register"
                         className="px-6 py-3 bg-dokan-dark text-dokan-light rounded-full font-quicksand
                         font-medium hover:bg-gray-800 transition-colors text-sm"
                     >

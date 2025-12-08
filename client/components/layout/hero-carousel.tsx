@@ -84,7 +84,7 @@ export default function HeroCarousel() {
         }}
       />
 
-      <div className="absolute inset-0 transition-all duration-700 bg-black/20" />
+      <div className="absolute inset-0 transition-all duration-700 bg-black/40" />
 
       {/* Content */}
       <div className="relative h-full flex items-center justify-center z-10">
