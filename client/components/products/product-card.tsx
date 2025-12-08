@@ -16,16 +16,18 @@ export default function ProductCard({ product }: ProductCardProps) {
             alt={product.name}
             className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300"
           />
-          {product.onSale && (
-            <div className="absolute top-4 right-4 bg-dokan-dark text-dokan-light px-3 py-1 rounded-full font-quicksand text-sm font-semibold">
-              Sale
-            </div>
-          )}
-          {product.isNew && (
-            <div className="absolute top-4 left-4 bg-dokan-dark text-dokan-light px-3 py-1 rounded-full font-quicksand text-sm font-semibold">
-              New
-            </div>
-          )}
+          <div className="absolute top-4 right-4 flex flex-col gap-2">
+            {product.onSale && (
+              <div className="bg-dokan-dark text-dokan-light px-3 py-1 rounded-full font-quicksand text-sm font-semibold">
+                Sale
+              </div>
+            )}
+            {product.isNew && (
+              <div className="bg-dokan-dark text-dokan-light px-3 py-1 rounded-full font-quicksand text-sm font-semibold">
+                New
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Info */}
@@ -37,9 +39,9 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           {/* Price */}
           <div className="flex items-center gap-2">
-            <span className="font-manrope font-bold text-lg text-dokan-dark">${product.price}</span>
+            <span className="font-manrope font-bold text-lg text-dokan-dark">Rs. {product.price}</span>
             {product.originalPrice && (
-              <span className="font-quicksand text-sm text-gray-600 line-through">${product.originalPrice}</span>
+              <span className="font-quicksand text-sm text-gray-600 line-through">Rs. {product.originalPrice}</span>
             )}
           </div>
         </div>
