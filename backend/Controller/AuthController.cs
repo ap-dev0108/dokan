@@ -43,12 +43,12 @@ public class AuthController : ControllerBase
         {
             Email = registerDto.email,
             UserName = registerDto.username,
-            PhoneNumber = registerDto.phoneNum
+            PhoneNumber = registerDto.phoneNumber
         };
 
         var results = await _userManager.CreateAsync(newUser, registerDto.password);
 
-        if (!results.Succeeded) return BadRequest(results.Errors);
+        if (!results.Succeeded) return BadRequest(new {errors = results.Errors.Select(e => new {e.Code, e.Description})} );
         
         await _userManager.AddToRoleAsync(newUser, "User");
 

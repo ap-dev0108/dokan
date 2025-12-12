@@ -4,12 +4,37 @@ import type React from "react"
 
 import Link from "next/link"
 import { useState } from "react"
+import axios from "axios"
+import { LoginFormData } from "@/lib/types/form"
 
 export default function LoginPage() {
   const [isAnimating, setIsAnimating] = useState(false)
+  const [formData, setFormData] = useState<LoginFormData>({
+    usermail: "",
+    password: ""
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Form Data Submitted:", formData);
+    try {
+      const res = await axios.post("http://localhost:5213/login", formData);
+      console.log("Status", res.status);
+      console.log("Response Data:", res.data);
+      localStorage.setItem("token", res.data.token);
+      
+    } catch (error) {
+      console.error("Login error:", error);
+    }
+
     setIsAnimating(true)
     setTimeout(() => {
       setIsAnimating(false)
@@ -45,7 +70,10 @@ export default function LoginPage() {
               <label className="block font-quicksand font-semibold text-dokan-dark mb-2">Email</label>
               <input
                 type="email"
+                name="usermail"
                 placeholder="you@example.com"
+                value={formData.usermail}
+                onChange={handleChange}
                 className="w-full px-4 py-3 border border-dokan-border rounded-lg font-quicksand text-dokan-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-dokan-dark focus:ring-offset-2"
               />
             </div>
@@ -55,7 +83,10 @@ export default function LoginPage() {
               <label className="block font-quicksand font-semibold text-dokan-dark mb-2">Password</label>
               <input
                 type="password"
+                name="password"
                 placeholder="••••••••"
+                value={formData.password}
+                onChange={handleChange}
                 className="w-full px-4 py-3 border border-dokan-border rounded-lg font-quicksand text-dokan-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-dokan-dark focus:ring-offset-2"
               />
             </div>

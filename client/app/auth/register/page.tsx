@@ -3,13 +3,40 @@
 import type React from "react"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import axios from "axios";
+import { Formdata } from "@/lib/types/form";
 
 export default function RegisterPage() {
-  const [isAnimating, setIsAnimating] = useState(false)
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [formData, setFormData] = useState<Formdata>({
+    username: "",
+    email: "",
+    password: "",
+    phoneNumber: ""
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Form Data Submitted:", formData);
+    try {
+      const res = await axios.post('http://localhost:5213/register', formData);
+      console.log("Status", res.status);
+      console.log("Response Data:", res.data);
+      localStorage.setItem("token", res.data.token);
+
+    } catch (error) {
+      console.error("Registration error:", error);
+    }
+
     setIsAnimating(true)
     setTimeout(() => {
       setIsAnimating(false)
@@ -56,7 +83,10 @@ export default function RegisterPage() {
               <label className="block font-quicksand font-semibold text-dokan-dark mb-2">Full Name</label>
               <input
                 type="text"
+                name="username"
                 placeholder="John Doe"
+                value={formData.username}
+                onChange={handleChange}
                 className="w-full px-4 py-3 border border-dokan-border rounded-lg font-quicksand text-dokan-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-dokan-dark focus:ring-offset-2"
               />
             </div>
@@ -66,7 +96,10 @@ export default function RegisterPage() {
               <label className="block font-quicksand font-semibold text-dokan-dark mb-2">Email</label>
               <input
                 type="email"
+                name="email"
                 placeholder="you@example.com"
+                value={formData.email}
+                onChange={handleChange}
                 className="w-full px-4 py-3 border border-dokan-border rounded-lg font-quicksand text-dokan-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-dokan-dark focus:ring-offset-2"
               />
             </div>
@@ -76,17 +109,23 @@ export default function RegisterPage() {
               <label className="block font-quicksand font-semibold text-dokan-dark mb-2">Password</label>
               <input
                 type="password"
+                name="password"
                 placeholder="••••••••"
+                value={formData.password}
+                onChange={handleChange}
                 className="w-full px-4 py-3 border border-dokan-border rounded-lg font-quicksand text-dokan-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-dokan-dark focus:ring-offset-2"
               />
             </div>
 
             {/* Confirm Password */}
             <div>
-              <label className="block font-quicksand font-semibold text-dokan-dark mb-2">Confirm Password</label>
+              <label className="block font-quicksand font-semibold text-dokan-dark mb-2">Phone Number</label>
               <input
-                type="password"
-                placeholder="••••••••"
+                type="number"
+                name="phoneNumber"
+                placeholder="+123-456-789-0"
+                value={formData.phoneNumber}
+                onChange={handleChange}
                 className="w-full px-4 py-3 border border-dokan-border rounded-lg font-quicksand text-dokan-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-dokan-dark focus:ring-offset-2"
               />
             </div>

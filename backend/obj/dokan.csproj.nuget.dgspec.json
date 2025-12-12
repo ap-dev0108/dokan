@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\aryan\\RiderProjects\\dokan\\dokan\\dokan.csproj": {}
+    "C:\\Users\\aryan\\RiderProjects\\dokan\\dokan\\backend\\dokan.csproj": {}
   },
   "projects": {
-    "C:\\Users\\aryan\\RiderProjects\\dokan\\dokan\\dokan.csproj": {
+    "C:\\Users\\aryan\\RiderProjects\\dokan\\dokan\\backend\\dokan.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\aryan\\RiderProjects\\dokan\\dokan\\dokan.csproj",
+        "projectUniqueName": "C:\\Users\\aryan\\RiderProjects\\dokan\\dokan\\backend\\dokan.csproj",
         "projectName": "dokan",
-        "projectPath": "C:\\Users\\aryan\\RiderProjects\\dokan\\dokan\\dokan.csproj",
+        "projectPath": "C:\\Users\\aryan\\RiderProjects\\dokan\\dokan\\backend\\dokan.csproj",
         "packagesPath": "C:\\Users\\aryan\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\aryan\\RiderProjects\\dokan\\dokan\\obj\\",
+        "outputPath": "C:\\Users\\aryan\\RiderProjects\\dokan\\dokan\\backend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\aryan\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -48,6 +48,10 @@
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
               "version": "[9.0.0, )"
+            },
+            "Microsoft.AspNetCore.Cors": {
+              "target": "Package",
+              "version": "[2.3.0, )"
             },
             "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
               "target": "Package",
