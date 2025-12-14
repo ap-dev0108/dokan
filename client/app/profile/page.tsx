@@ -5,9 +5,7 @@ import { Mail, Phone, Calendar } from "lucide-react"
 import { userProfile } from "@/hooks/userProfile"
 
 export default function ProfilePage() {
-
     const { profile, loading, error } = userProfile();
-
     if (loading) return <p>Loading...</p>
     if (error) return <p>{error}</p>
 
@@ -32,7 +30,7 @@ export default function ProfilePage() {
               <div className="space-y-6">
                 <div className="pb-6 border-b border-dokan-border">
                   <h2 className="font-manrope font-bold text-lg text-dokan-dark mb-2">Username</h2>
-                  <p className="font-quicksand text-gray-600">{profile.username}</p>
+                  <p className="font-quicksand text-gray-600">{profile.name}</p>
                 </div>
 
                 <div className="pb-6 border-b border-dokan-border">

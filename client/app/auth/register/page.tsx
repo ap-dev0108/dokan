@@ -4,8 +4,10 @@ import type React from "react"
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import axios from "axios";
 import { Formdata } from "@/lib/types/form";
+import { getUserFromToken } from "@/services/authServices"
 
 export default function RegisterPage() {
   const [isAnimating, setIsAnimating] = useState(false);
@@ -16,6 +18,8 @@ export default function RegisterPage() {
     phoneNumber: ""
   });
 
+  const router = useRouter(); 
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -24,12 +28,26 @@ export default function RegisterPage() {
     }));
   };
 
+  useEffect(() => {
+    const checkUser = async() => {
+      const user = await getUserFromToken();
+
+      if(!user) router.push('/auth/login');
+      else if (user.role === 'Admin') router.push('/admin/dashboard');
+      else router.push('/profile');
+      
+    }
+  })
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form Data Submitted:", formData);
     try {
       const res = await axios.post('http://localhost:5213/register', formData);
       console.log("Status", res.status);
+
+      if (res.status == 200) router.push('/profile');
+
       console.log("Response Data:", res.data);
       localStorage.setItem("token", res.data.token);
 

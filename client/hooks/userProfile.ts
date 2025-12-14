@@ -1,7 +1,7 @@
 import {  useState, useEffect } from "react";
 import { getUserFromToken } from "@/services/authServices";
 
-export const userProfile = async () => {
+export const userProfile = () => {
     const [profile, setProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

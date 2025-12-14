@@ -79,7 +79,10 @@ public class AuthController : ControllerBase
         return Ok(new
         {
             user,
-            authenticated = User.Identity?.IsAuthenticated ?? false
+            authenticated = User.Identity?.IsAuthenticated ?? false,
+            name = User.FindFirst(ClaimTypes.Name)?.Value,
+            email = User.FindFirst(ClaimTypes.Email)?.Value,
+            phoneNumber = User.FindFirst(ClaimTypes.MobilePhone)?.Value
         });
     }
 
@@ -95,7 +98,8 @@ public class AuthController : ControllerBase
             new Claim(ClaimTypes.NameIdentifier, user.Id),
             new Claim(ClaimTypes.Name, user.UserName ?? user.Email ?? ""),
             new Claim(ClaimTypes.Email, user.Email ?? ""),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.MobilePhone, user.PhoneNumber ?? "")
         };
 
         foreach (var role in roles)

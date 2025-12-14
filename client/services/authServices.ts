@@ -6,12 +6,16 @@ export const getUserFromToken = async () => {
     if (!token) return null;
 
     try {
-        const res = await axios.get("http://localhost:5213/profile", {
+        const res = await axios.get("http://localhost:5213/Auth/profile", {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
-        return res.data;
+
+        const decoded: any = jwtDecode(token);
+
+        console.log("Profile Data:", res.data);
+        return { ...res.data, decoded};
     } catch (error) {
         console.error("Profile fetch error:", error);
         return null;

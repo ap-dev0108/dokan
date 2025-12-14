@@ -3,9 +3,11 @@
 import type React from "react"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import axios from "axios"
 import { LoginFormData } from "@/lib/types/form"
+import { useRouter } from "next/navigation"
+import { getUserFromToken } from "@/services/authServices"
 
 export default function LoginPage() {
   const [isAnimating, setIsAnimating] = useState(false)
@@ -22,12 +24,27 @@ export default function LoginPage() {
     }));
   };
 
+  useEffect(() => {
+    const user = async () => {
+      const roles = await getUserFromToken();
+      
+      if (!roles) router.push('/auth/login');
+      else if (roles.role === 'Admin') router.push('/admin/dashboard');
+      else router.push('/profile');
+    }
+  }, []);
+
+  const router = useRouter();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form Data Submitted:", formData);
     try {
       const res = await axios.post("http://localhost:5213/login", formData);
       console.log("Status", res.status);
+
+      if (res.status == 200) router.push('/profile');
+
       console.log("Response Data:", res.data);
       localStorage.setItem("token", res.data.token);
       

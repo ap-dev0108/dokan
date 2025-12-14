@@ -23,16 +23,12 @@ public class ProductController : ControllerBase
         _db = db;
         _userManager = userManager;
     }
-    
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [AllowAnonymous]
     [HttpGet("allProducts")]
     public async Task<IActionResult> GetAllProducts()
     {
         try
         {
-            if (!User.IsInRole("Admin"))
-                return Forbid();
-
             var allProducts = await _db.Products.ToListAsync();
 
             if (!allProducts.Any())
