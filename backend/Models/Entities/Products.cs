@@ -1,12 +1,12 @@
 using System.ComponentModel.DataAnnotations;
+using dokan.Models.Enum;
 
 namespace dokan.Models.Entities;
 
 public class Products
 {
-    [Key] public Guid productId { get; set; } =  Guid.NewGuid();
-    [Required] public string productTitle { get; set; }
-    [Required] public string productDescription { get; set; }
-    [Required] public float price { get; set; }
-    public string? imageUrl { get; set; }
+    [Key] public Guid ProductID { get; set; } =  Guid.NewGuid();
+
+    public ProductDetails productDetails { get; set; }
+    public ProductMeta productMeta { get; set; }
 }

@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.ComponentModel;
+using System.Security.Cryptography.X509Certificates;
 
 namespace dokan.Controller;
 
@@ -23,6 +25,7 @@ public class ProductController : ControllerBase
         _db = db;
         _userManager = userManager;
     }
+
     [AllowAnonymous]
     [HttpGet("allProducts")]
     public async Task<IActionResult> GetAllProducts()
@@ -43,38 +46,76 @@ public class ProductController : ControllerBase
     }
 
 
+    [AllowAnonymous]
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetProductsById(Guid id)
+    {
+        try
+        {
+            var product = await _db.Products.FirstOrDefaultAsync(p => p.ProductID == id);
+
+            if (product == null)
+                return NotFound(new { error = "Product not found" });
+
+            return Ok(new { productData = product });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpPost("addProduct")]
-    public async Task<IActionResult> AddProduct([FromForm] ProductDTO products) {
+    public async Task<IActionResult> AddProduct([FromForm] ProductDTO details) {
         try {
-            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(products.File.FileName)}";
-            var path = Path.Combine("wwwroot/images/products", fileName);
-
-            using var stream = new FileStream(path, FileMode.Create);
-            await products.File.CopyToAsync(stream);
-
+            var fileName = details.File != null ? $"{Guid.NewGuid()}{Path.GetExtension(details.File.FileName)}" : "default.jpg";
+            var imagePath = $"/uploads/products/{fileName}";
+            
+            if (details.File != null)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "products");
+                Directory.CreateDirectory(uploadsFolder);
+                
+                var path = Path.Combine(uploadsFolder, fileName);
+                using var stream = new FileStream(path, FileMode.Create);
+                await details.File.CopyToAsync(stream);
+            }
+            
             var newProduct = new Products
             {
-                productId = Guid.NewGuid(),
-                productTitle = products.productTitle,
-                productDescription = products.productDescription,
-                price = products.price,
-                imageUrl = $"/images/products/{fileName}"
+                ProductID = Guid.NewGuid(),
+                productDetails = new ProductDetails
+                {
+                    productTitle = details.productTitle,
+                    productDescription = details.productDescription,
+                    MarkedPrice = details.MarkedPrice,
+                    imageUrl = imagePath
+                },
+                productMeta = new ProductMeta
+                {
+                    isSale = details.isSale,
+                    SalePrice = details.SalePrice,
+                    isNew = details.isNew,
+                    stock = details.stock,
+                    category = details.category,
+                }
             };
 
             await _db.Products.AddAsync(newProduct);
             await _db.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetAllProducts), new { id = newProduct.productId }, newProduct);
+            return CreatedAtAction(nameof(GetAllProducts), new { id = newProduct.ProductID }, newProduct);
         } catch (Exception ex) {
             return BadRequest(new { error = ex.Message });
         }
     }
     
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpDelete("deleteProduct")]
     public async Task<IActionResult> DeleteProduct([FromBody] Guid id)
     {
-        var existingProducts = await _db.Products.FirstOrDefaultAsync(f =>f.productId == id);
+        var existingProducts = await _db.Products.FirstOrDefaultAsync(f => f.ProductID == id);
 
         if (existingProducts == null) return BadRequest(new { error = "Product with the ID does not exist" });
 
@@ -82,24 +123,33 @@ public class ProductController : ControllerBase
         await _db.SaveChangesAsync();
         return Ok($"Product {id} has been deleted");
     }
-    
-    // Replace the image later
-    [HttpPost("{id}/image")]
-    public async Task<IActionResult> UploadImage(Guid id, IFormFile file)
+
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [AllowAnonymous]
+    [HttpGet("filterProducts/{category}")]
+    public async Task<IActionResult> GetProducts(string category)
     {
-        var product = await _db.Products.FindAsync(id);
-        if (product == null) return NotFound();
-
-        var fileName = $"{id}{Path.GetExtension(file.FileName)}";
-        var path = Path.Combine("wwwroot/images/products", fileName);
-
-        using var stream = new FileStream(path, FileMode.Create);
-        await file.CopyToAsync(stream);
-
-        product.imageUrl = $"/images/products/{fileName}";
-        await _db.SaveChangesAsync();
-
-        return Ok(new { product.imageUrl });
+        try
+        {
+            var filteredProducts = await _db.Products.Where(p => p.productMeta.category.ToString() == category).ToListAsync();
+            return Ok(new { productData = filteredProducts });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
     }
 
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [AllowAnonymous]
+    [HttpGet("saleProducts")]
+    public async Task<IActionResult> GetSaleProducts() {
+        try {
+            var saleProducts = await _db.Products.Where(p => p.productMeta.isSale).ToListAsync();
+            return Ok(new { productData = saleProducts });
+        } catch (Exception ex) {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+    
 }

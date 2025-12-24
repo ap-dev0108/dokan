@@ -82,7 +82,8 @@ public class AuthController : ControllerBase
             authenticated = User.Identity?.IsAuthenticated ?? false,
             name = User.FindFirst(ClaimTypes.Name)?.Value,
             email = User.FindFirst(ClaimTypes.Email)?.Value,
-            phoneNumber = User.FindFirst(ClaimTypes.MobilePhone)?.Value
+            phoneNumber = User.FindFirst(ClaimTypes.MobilePhone)?.Value,
+            roles = User.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList()
         });
     }
 

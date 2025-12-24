@@ -156,25 +156,12 @@ namespace dokan.Migrations
 
             modelBuilder.Entity("dokan.Models.Entities.Products", b =>
                 {
-                    b.Property<Guid>("productId")
+                    b.Property<Guid>("ProductID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("productId");
 
-                    b.Property<string>("imageUrl")
-                        .HasColumnType("text");
-
-                    b.Property<float>("price")
-                        .HasColumnType("real");
-
-                    b.Property<string>("productDescription")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("productTitle")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("productId");
+                    b.HasKey("ProductID");
 
                     b.ToTable("Products");
                 });
@@ -342,6 +329,70 @@ namespace dokan.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("dokan.Models.Entities.Products", b =>
+                {
+                    b.OwnsOne("dokan.Models.Entities.ProductMeta", "productMeta", b1 =>
+                        {
+                            b1.Property<Guid>("ProductsProductID")
+                                .HasColumnType("uuid");
+
+                            b1.Property<float?>("SalePrice")
+                                .HasColumnType("real");
+
+                            b1.Property<int>("category")
+                                .HasColumnType("integer");
+
+                            b1.Property<bool?>("isNew")
+                                .HasColumnType("boolean");
+
+                            b1.Property<bool>("isSale")
+                                .HasColumnType("boolean");
+
+                            b1.Property<int>("stock")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("ProductsProductID");
+
+                            b1.ToTable("Products");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ProductsProductID");
+                        });
+
+                    b.OwnsOne("dokan.Models.Entities.ProductDetails", "productDetails", b1 =>
+                        {
+                            b1.Property<Guid>("productId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<float>("MarkedPrice")
+                                .HasColumnType("real");
+
+                            b1.Property<string>("imageUrl")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("productDescription")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("productTitle")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.HasKey("productId");
+
+                            b1.ToTable("Products");
+
+                            b1.WithOwner()
+                                .HasForeignKey("productId");
+                        });
+
+                    b.Navigation("productDetails")
+                        .IsRequired();
+
+                    b.Navigation("productMeta")
                         .IsRequired();
                 });
 

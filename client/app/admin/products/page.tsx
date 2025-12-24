@@ -4,20 +4,17 @@ import type React from "react"
 
 import AdminSidebar from "@/components/layout/admin-sidebar"
 import { type Product } from "@/lib/products"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Search, Plus, Edit, Trash2 } from "lucide-react"
 import Image from "next/image"
+import { fetchProducts } from "@/services/productServices"
 
 export default function AdminProducts() {
-  const [products, setProducts] = useState<Product>({
-    productTitle: "",
-    productDescription: "",
-    price: 0,
-    imageUrl: ""
-  })
+  const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState("")
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [loading, setLoading] = useState(true);
 
   const handleAddProduct = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -33,10 +30,24 @@ export default function AdminProducts() {
     setEditingProduct(null)
   }
 
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const data = await fetchProducts();
+        if (data) setProducts(data);
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    }
+
+    loadProducts();
+  }, []);
+
   return (
     <div className="flex min-h-screen bg-dokan-light">
       <AdminSidebar />
-
       <main className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
@@ -65,7 +76,7 @@ export default function AdminProducts() {
                     <input
                       type="text"
                       name="name"
-                      defaultValue={editingProduct?.name}
+                      defaultValue={editingProduct?.productTitle}
                       required
                       className="w-full px-4 py-2 border border-dokan-border rounded-lg font-quicksand focus:outline-none focus:ring-2 focus:ring-dokan-dark"
                     />
@@ -91,7 +102,7 @@ export default function AdminProducts() {
                       <input
                         type="number"
                         name="originalPrice"
-                        defaultValue={editingProduct?.originalPrice}
+                        defaultValue={editingProduct?.price}
                         className="w-full px-4 py-2 border border-dokan-border rounded-lg font-quicksand focus:outline-none focus:ring-2 focus:ring-dokan-dark"
                       />
                     </div>
@@ -101,7 +112,7 @@ export default function AdminProducts() {
                     <label className="block font-quicksand text-sm font-semibold text-dokan-dark mb-2">Category</label>
                     <select
                       name="category"
-                      defaultValue={editingProduct?.category}
+                      defaultValue={editingProduct?.productDescription}
                       required
                       className="w-full px-4 py-2 border border-dokan-border rounded-lg font-quicksand focus:outline-none focus:ring-2 focus:ring-dokan-dark"
                     >
@@ -117,7 +128,7 @@ export default function AdminProducts() {
                     <input
                       type="text"
                       name="image"
-                      defaultValue={editingProduct?.image}
+                      defaultValue={editingProduct?.imageUrl}
                       required
                       className="w-full px-4 py-2 border border-dokan-border rounded-lg font-quicksand focus:outline-none focus:ring-2 focus:ring-dokan-dark"
                     />
@@ -125,15 +136,15 @@ export default function AdminProducts() {
 
                   <div className="flex gap-4">
                     <label className="flex items-center gap-2 font-quicksand text-sm">
-                      <input type="checkbox" name="featured" defaultChecked={editingProduct?.featured} />
+                      <input type="checkbox" name="featured"  />
                       Featured
                     </label>
                     <label className="flex items-center gap-2 font-quicksand text-sm">
-                      <input type="checkbox" name="isNew" defaultChecked={editingProduct?.isNew} />
+                      <input type="checkbox" name="isNew" />
                       New
                     </label>
                     <label className="flex items-center gap-2 font-quicksand text-sm">
-                      <input type="checkbox" name="onSale" defaultChecked={editingProduct?.onSale} />
+                      <input type="checkbox" name="onSale" />
                       On Sale
                     </label>
                   </div>
@@ -173,31 +184,35 @@ export default function AdminProducts() {
             />
           </div>
 
+          {loading && (
+            <p className="text-gray-700 py-12"> Loading... </p>
+          )}
+
           {/* Products Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.map((product) => (
-              <div key={product.id} className="bg-white rounded-lg border border-dokan-border overflow-hidden">
+            {products.map((product) => (
+              <div key={product.productId} className="bg-white rounded-lg border border-dokan-border overflow-hidden">
                 <div className="relative h-64">
-                  <Image src={product.image || "/placeholder.svg"} alt={product.name} fill className="object-cover" />
-                  {product.onSale && (
+                  <Image src={product.imageUrl || "/placeholder.svg"} alt={product.productTitle} fill className="object-cover" />
+                  {product && (
                     <span className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 text-xs font-quicksand font-semibold rounded">
                       SALE
                     </span>
                   )}
-                  {product.isNew && (
+                  {product && (
                     <span className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 text-xs font-quicksand font-semibold rounded">
                       NEW
                     </span>
                   )}
                 </div>
                 <div className="p-4">
-                  <h3 className="font-manrope text-lg font-bold text-dokan-dark mb-2">{product.name}</h3>
-                  <p className="font-quicksand text-sm text-gray-600 mb-2">{product.category}</p>
+                  <h3 className="font-manrope text-lg font-bold text-dokan-dark mb-2">{product.productTitle}</h3>
+                  <p className="font-quicksand text-sm text-gray-600 mb-2">{product.price}</p>
                   <div className="flex items-center gap-2 mb-4">
                     <span className="font-manrope text-xl font-bold text-dokan-dark">Rs. {product.price}</span>
-                    {product.originalPrice && (
+                    {product.price && (
                       <span className="font-quicksand text-sm text-gray-500 line-through">
-                        Rs. {product.originalPrice}
+                        Rs. {product.price}
                       </span>
                     )}
                   </div>
@@ -210,7 +225,6 @@ export default function AdminProducts() {
                       Edit
                     </button>
                     <button
-                      onClick={() => deleteProduct(product.id)}
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg font-quicksand hover:bg-red-600 transition-colors"
                     >
                       <Trash2 size={16} />
@@ -223,7 +237,7 @@ export default function AdminProducts() {
           </div>
 
           <p className="font-quicksand text-sm text-gray-600 mt-6">
-            Showing {filteredProducts.length} of {products.length} products
+            Showing {products.length} of {products.length} products
           </p>
         </div>
       </main>

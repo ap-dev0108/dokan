@@ -11,7 +11,6 @@ export const getUserFromToken = async () => {
                 Authorization: `Bearer ${token}`
             }
         });
-
         const decoded: any = jwtDecode(token);
 
         console.log("Profile Data:", res.data);

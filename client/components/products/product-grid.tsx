@@ -4,27 +4,26 @@ import { Product } from "@/lib/products";
 import ProductCard from "./product-card";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { fetchProducts } from "@/services/productServices";
 
 export default function ProductGrid() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const getProducts = async() => {
       try {
-        const res = await axios.get(
-          "http://localhost:5213/api/Product/allProducts"
-        );
-        setProducts(res.data.productData);
-        console.log("Fetched products:", res.data);
+        const res = fetchProducts();
+        if (res) {
+          setProducts(await res);
+          console.log("Products set in component:", await res);
+        }
       } catch (error) {
-        console.error("Error fetching products:", error);
-      } finally {
-        setLoading(false);
+        console.log("Error fetching products in component:", error);
       }
-    };
+    }
 
-    fetchProducts();
+    getProducts().finally(() => setLoading(false));
   }, []);
 
   if (loading) {

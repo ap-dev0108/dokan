@@ -1,20 +1,20 @@
 "use client"
 
-import { fetchProducts } from "@/services/productServices"
+import { fetchSaleProducts } from "@/services/productServices"
 import { Product } from "@/lib/products"
 import { useEffect, useState } from "react"
-import axios from "axios"
 
-export default function ShopPage() {
+export default function SalesPage() {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const data = await fetchProducts();
+        const data = await fetchSaleProducts();
         if (data) {
           setProducts(data);
+          console.log("Sales Data: ", data)
         }
         setLoading(false);
       }
@@ -35,8 +35,8 @@ export default function ShopPage() {
       {/* Header */}
       <section className="border-b border-dokan-border py-12">
         <div className="dokan-container">
-          <h1 className="font-manrope font-bold text-5xl text-dokan-dark mb-4">Shop All</h1>
-          <p className="font-quicksand text-lg text-gray-600">Browse our complete collection of premium products.</p>
+          <h1 className="font-manrope font-bold text-5xl text-dokan-dark mb-4">On Sale</h1>
+          <p className="font-quicksand text-lg text-gray-600">Shop exclusive sale items with up to 50% off.</p>
         </div>
       </section>
 

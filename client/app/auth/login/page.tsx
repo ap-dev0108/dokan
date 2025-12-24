@@ -26,12 +26,14 @@ export default function LoginPage() {
 
   useEffect(() => {
     const user = async () => {
-      const roles = await getUserFromToken();
+      const role = await getUserFromToken();
       
-      if (!roles) router.push('/auth/login');
-      else if (roles.role === 'Admin') router.push('/admin/dashboard');
+      if (!role) router.push('/auth/login');
+      else if (role.roles[0] == 'Admin') router.push('/admin');
       else router.push('/profile');
     }
+
+    user();
   }, []);
 
   const router = useRouter();
