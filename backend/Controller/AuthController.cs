@@ -8,6 +8,7 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using System.Security.Cryptography.X509Certificates;
 
 namespace dokan.Controller;
 
@@ -70,7 +71,6 @@ public class AuthController : ControllerBase
         return Ok(new { token });
     }
 
-    [Authorize]
     [HttpGet("profile")]
     public IActionResult GetProfile()
     {
@@ -116,5 +116,34 @@ public class AuthController : ControllerBase
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    [HttpPost("verify-token")]
+    public IActionResult VerifyToken([FromBody] TokenRequest tokenRequest)
+    {
+        var jwtSettings = _configuration.GetSection("Jwt");
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not found in configuration"));
+
+        try
+        {
+            tokenHandler.ValidateToken(tokenRequest.Token, new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = true,
+                ValidIssuer = jwtSettings["Issuer"],
+                ValidateAudience = true,
+                ValidAudience = jwtSettings["Audience"],
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            }, out SecurityToken validatedToken);
+
+            return Ok(new { valid = true });
+        }
+        catch
+        {
+            return Ok(new { valid = false });
+        }
     }
 }

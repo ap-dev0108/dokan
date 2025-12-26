@@ -28,9 +28,9 @@ export default function LoginPage() {
     const user = async () => {
       const role = await getUserFromToken();
       
-      if (!role) router.push('/auth/login');
-      else if (role.roles[0] == 'Admin') router.push('/admin');
-      else router.push('/profile');
+      if (!role) return;
+      else if (role.roles.Include("Admin")) router.replace('/admin');
+      else router.replace('/profile');
     }
 
     user();

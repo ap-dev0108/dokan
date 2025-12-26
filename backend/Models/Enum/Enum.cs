@@ -11,3 +11,18 @@ public enum Category
     Footwear = 7,
     Watches = 8
 }
+
+public enum OrderStatus
+{
+    Pending = 1,
+    Shipped = 2,
+    Delivered = 3,
+    Cancelled = 4
+}
+
+public enum PaymentStatus
+{
+    Pending = 1,
+    Success = 2,
+    Failed = 3
+}

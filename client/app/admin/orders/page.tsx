@@ -4,14 +4,45 @@ import type React from "react"
 
 import AdminSidebar from "@/components/layout/admin-sidebar"
 import { mockAdminOrders, type AdminOrder } from "@/lib/admin-data"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Search, Eye, Edit2, X } from "lucide-react"
+import { getAdminOrders } from "@/services/orderServices"
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState<AdminOrder[]>(mockAdminOrders)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null)
   const [editingOrder, setEditingOrder] = useState<AdminOrder | null>(null)
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const apiOrders = await getAdminOrders()
+        // map backend shape to AdminOrder
+        const mapped: AdminOrder[] = apiOrders.map((o: any) => ({
+          id: o.id,
+          orderDate: new Date(o.orderDate).toISOString().slice(0, 10),
+          totalAmount: o.totalAmount,
+          status: o.status,
+          userId: o.userId,
+          userName: o.userName || "N/A",
+          userEmail: o.userEmail || "",
+          paymentMethod: o.paymentMethod || "N/A",
+          shippingAddress: o.shippingAddress || "",
+          items: (o.items || []).map((i: any) => ({
+            name: i.name,
+            price: i.price,
+            quantity: i.quantity,
+          })),
+        }))
+        setOrders(mapped)
+      } catch (err) {
+        console.warn("Falling back to mock admin orders", err)
+        setOrders(mockAdminOrders)
+      }
+    }
+    load()
+  }, [])
 
   const filteredOrders = orders.filter(
     (order) =>

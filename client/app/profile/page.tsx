@@ -3,12 +3,18 @@
 import ProfileSidebar from "@/components/layout/profile-sidebar"
 import { Mail, Phone, Calendar } from "lucide-react"
 import { userProfile } from "@/hooks/userProfile"
+import ProfileNotFound from "@/components/auth/Profile-NotFound"
+import { useAuth } from "@/hooks/useAuth"
 
 export default function ProfilePage() {
     const { profile, loading, error } = userProfile();
+    const { IsLoggedIn } = useAuth();
     if (loading) return <p>Loading...</p>
     if (error) return <p>{error}</p>
 
+    if (IsLoggedIn == false) 
+      return <div> <ProfileNotFound /> </div>
+      
   return (
     <div className="min-h-screen bg-dokan-light">
       <div className="flex h-screen">

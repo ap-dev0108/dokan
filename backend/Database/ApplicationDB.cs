@@ -11,6 +11,9 @@ public class ApplicationDB : IdentityDbContext<User>
     public DbSet<UserProfile> UserProfiles { get; set; }
     public DbSet<UserAddress> UserAddresses { get; set; }
     public DbSet<Products> Products { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<Payment> Payments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -22,5 +25,10 @@ public class ApplicationDB : IdentityDbContext<User>
         
         modelBuilder.Entity<Products>().OwnsOne(p => p.productDetails);
         modelBuilder.Entity<Products>().OwnsOne(p => p.productMeta);
+
+        modelBuilder.Entity<Order>()
+            .HasMany(o => o.OrderItems)
+            .WithOne(oi => oi.Order)
+            .HasForeignKey(oi => oi.OrderId);
     }
 }

@@ -20,3 +20,23 @@ export const getUserFromToken = async () => {
         return null;
     }
 }
+
+export const verifyToken = async () => {
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) return null;
+        
+        try {
+            const res = await axios.post("http://localhost:5213/Auth/verify-token", { token }, {
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+            return res.data;
+        } catch (error) {
+            console.error(error);
+        }
+    } catch (error) {
+        return error;
+    }
+}

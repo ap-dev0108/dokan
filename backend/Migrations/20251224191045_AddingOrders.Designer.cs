@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using dokan.Database;
@@ -11,9 +12,11 @@ using dokan.Database;
 namespace dokan.Migrations
 {
     [DbContext(typeof(ApplicationDB))]
-    partial class ApplicationDBModelSnapshot : ModelSnapshot
+    [Migration("20251224191045_AddingOrders")]
+    partial class AddingOrders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -166,14 +169,6 @@ namespace dokan.Migrations
                     b.Property<DateTime?>("PaidAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ShippingAddress")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
@@ -200,9 +195,6 @@ namespace dokan.Migrations
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("OrderId1")
-                        .HasColumnType("uuid");
-
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
 
@@ -219,8 +211,6 @@ namespace dokan.Migrations
                     b.HasKey("OrderItemId");
 
                     b.HasIndex("OrderId");
-
-                    b.HasIndex("OrderId1");
 
                     b.ToTable("OrderItems");
                 });
@@ -444,10 +434,6 @@ namespace dokan.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("dokan.Models.Entities.Order", null)
-                        .WithMany("Items")
-                        .HasForeignKey("OrderId1");
-
                     b.Navigation("Order");
                 });
 
@@ -546,8 +532,6 @@ namespace dokan.Migrations
 
             modelBuilder.Entity("dokan.Models.Entities.Order", b =>
                 {
-                    b.Navigation("Items");
-
                     b.Navigation("OrderItems");
 
                     b.Navigation("Payment");
